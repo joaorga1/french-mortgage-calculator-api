@@ -1,59 +1,400 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏠 Mortgage Calculator API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API for mortgage simulation using the **French amortization method**. Built with Laravel 12 + PHP 8.4.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 About the Project
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+This API accurately calculates the **monthly payment** for a mortgage, supporting:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- ✅ **Fixed Rate**: Constant interest rate throughout the period
+- ✅ **Variable Rate**: Euribor (or other index) + Spread
+- ✅ **Strict Validations**: 15+ validation rules for data integrity
+- ✅ **Rate Limiting**: Protection against abuse (60 req/min)
+- ✅ **100% Tested**: 25 tests (unit + feature)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🧮 French Amortization Method
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Mathematical Formula
 
-## Laravel Sponsors
+```
+M = P × [i(1 + i)ⁿ] / [(1 + i)ⁿ - 1]
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Legend:**
+- **M** = Monthly payment (€)
+- **P** = Loan amount (€)
+- **i** = Monthly interest rate = (APR ÷ 12 ÷ 100) (%)
+- **n** = Number of months
 
-### Premium Partners
+### 💡 Practical Example
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Scenario:**
+- Loan: **200 000€**
+- Term: **30 years** (360 months)
+- APR: **3.5%** (annual percentage rate)
 
-## Contributing
+**Calculation:**
+```
+i = 3.5 ÷ 12 ÷ 100 = 0.002917
+M = 200,000 × [0.002917 × (1.002917)³⁶⁰] / [(1.002917)³⁶⁰ - 1]
+M ≈ 898.09€/month
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Total paid:** 323,312€ (Principal: 200,000€ + Interest: 123,312€)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🛠️ Tech Stack
 
-## Security Vulnerabilities
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **PHP** | 8.4 | Strictly typed language |
+| **Laravel** | 12.0 | RESTful API framework |
+| **Docker** | via Sail | Development environment |
+| **PHPUnit** | 11.5 | Automated testing |
+| **PHPStan** | 2.1 (level 6) | Static code analysis |
+| **PHP-CS-Fixer** | 3.89 | PSR-12 + Laravel formatting |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 📦 Installation
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Prerequisites
+
+- **Docker Desktop** (Windows/Mac) or **Docker Engine** (Linux)
+- **Git**
+
+### Step by Step
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd api
+
+# 2. Copy environment variables
+cp .env.example .env
+
+# 3. Start Docker containers (Laravel Sail)
+./vendor/bin/sail up -d
+
+# 4. Generate application key
+./vendor/bin/sail artisan key:generate
+
+# 5. Check application health
+curl http://localhost/api/health
+# Expected response: 200 OK
+```
+
+### Optional Alias (Recommended)
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+alias sail='./vendor/bin/sail'
+
+# Now you can use:
+sail up -d
+sail artisan test
+```
+
+---
+
+## 🚀 API Usage
+
+### Endpoint: Calculate Monthly Payment
+
+```http
+POST /api/mortgage/calculate
+Content-Type: application/json
+Accept: application/json
+```
+
+---
+
+### 📘 Example 1: Fixed Rate
+
+**Request:**
+```bash
+curl -X POST http://localhost/api/mortgage/calculate \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "loan_amount": 200000,
+    "duration_months": 360,
+    "type": "fixed",
+    "rate": 3.5
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "data": {
+    "monthly_payment": 898.09,
+    "loan_amount": 200000,
+    "duration_months": 360,
+    "annual_rate": 3.5,
+    "method": "french_amortization",
+    "currency": "EUR",
+    "metadata": {
+      "calculation_date": "2025-11-02T15:30:00+00:00",
+      "formula": "M = P * [i(1 + i)^n] / [(1 + i)^n - 1]"
+    }
+  }
+}
+```
+
+---
+
+### 📗 Example 2: Variable Rate (Euribor + Spread)
+
+**Request:**
+```bash
+curl -X POST http://localhost/api/mortgage/calculate \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "loan_amount": 250000,
+    "duration_months": 300,
+    "type": "variable",
+    "index_rate": 2.8,
+    "spread": 1.3
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "data": {
+    "monthly_payment": 1186.19,
+    "loan_amount": 250000,
+    "duration_months": 300,
+    "annual_rate": 4.1,
+    "method": "french_amortization",
+    "currency": "EUR",
+    "metadata": {
+      "calculation_date": "2025-11-02T15:35:00+00:00",
+      "formula": "M = P * [i(1 + i)^n] / [(1 + i)^n - 1]"
+    }
+  }
+}
+```
+
+> **Note:** APR = index_rate + spread = 2.8% + 1.3% = **4.1%**
+
+---
+
+### ❌ Example 3: Validation (Error 422)
+
+**Invalid request:**
+```bash
+curl -X POST http://localhost/api/mortgage/calculate \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "loan_amount": 3000,
+    "type": "fixed"
+  }'
+```
+
+**Response (422 Unprocessable Entity):**
+```json
+{
+  "message": "Loan amount must be greater than 5000€ (and 1 more error)",
+  "errors": {
+    "loan_amount": [
+      "Loan amount must be greater than 5000€"
+    ],
+    "duration_months": [
+      "Duration is required"
+    ]
+  }
+}
+```
+
+---
+
+## 📖 API Documentation
+
+### Available Endpoints
+
+| Method | Endpoint | Description | Rate Limit |
+|--------|----------|-------------|------------|
+| `POST` | `/api/mortgage/calculate` | Calculate monthly payment | 60/min |
+| `GET` | `/api/health` | Health check (API metadata) | - |
+| `GET` | `/up` | Laravel native health check | - |
+
+> **💡 About the Health Check Endpoints:**  
+> Laravel provides `/up` by default for **basic infrastructure checks** (container/pod liveness). However, the custom `/api/health` endpoint was added as a **best practice** to go beyond basic status:
+>
+> **`/up` (Laravel native):**
+> - Basic application availability
+> - Infrastructure-level health (Docker, Kubernetes liveness probes)
+> 
+> **`/api/health` (Custom):**
+> - Can be extended to monitor **application-specific dependencies**:
+>   - Database connections
+>   - Cache services (Redis, Memcached)
+>   - Third-party API availability
+>   - Custom business logic health metrics
+>
+> This approach enables **comprehensive monitoring** beyond simple container status, allowing early detection of application-level issues before they impact users.
+
+---
+
+### Request Parameters
+
+#### **Fixed Rate** (`type: "fixed"`)
+
+| Field | Type | Required | Validation | Example |
+|-------|------|----------|------------|---------|
+| `loan_amount` | number | ✅ | 5 000 - 10 000 000 | 200 000 |
+| `duration_months` | integer | ✅ | 60 - 480 (5-40 years) | 360 |
+| `type` | string | ✅ | "fixed" | "fixed" |
+| `rate` | number | ✅ | 0 - 100 | 3.5 |
+
+#### **Variable Rate** (`type: "variable"`)
+
+| Field | Type | Required | Validation | Example |
+|-------|------|----------|------------|---------|
+| `loan_amount` | number | ✅ | 5 000 - 10 000 000 | 180000 |
+| `duration_months` | integer | ✅ | 60 - 480 (5-40 years) | 300 |
+| `type` | string | ✅ | "variable" | "variable" |
+| `index_rate` | number | ✅ | 0 - 100 (Euribor) | 2.5 |
+| `spread` | number | ✅ | 0 - 100 | 1.5 |
+
+---
+
+### Response Structure
+
+```json
+{
+  "data": {
+    "monthly_payment": number,      // Monthly payment in EUR
+    "loan_amount": number,          // Loan amount
+    "duration_months": integer,     // Term in months
+    "annual_rate": number,          // Applied APR
+    "method": "french_amortization",
+    "currency": "EUR",
+    "metadata": {
+      "calculation_date": string,   // Date of simulation
+      "formula": string             // Formula used
+    }
+  }
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+api/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   └── Api/
+│   │   │       └── MortgageController.php       # API endpoints
+│   │   ├── Middleware/
+│   │   │   └── ForceJsonResponse.php            # Force JSON responses
+│   │   ├── Requests/
+│   │   │   └── CalculateMortgageRequest.php     # Validations
+│   │   └── Resources/
+│   │       └── MortgageCalculationResource.php  # JSON formatting
+│   ├── Providers/
+│   │   └── AppServiceProvider.php               # Register services
+│   └── Services/
+│       └── MortgageCalculatorService.php        # Business logic
+├── config/
+│   └── cors.php                                 # CORS configuration
+├── routes/
+│   └── api.php                                  # API routes
+├── tests/
+│   ├── Unit/
+│   │   └── MortgageCalculatorServiceTest.php   # 8 unit tests
+│   └── Feature/
+│       └── MortgageCalculationTest.php          # 17 HTTP tests
+├── .php-cs-fixer.php                            # Formatting config
+├── phpstan.neon                                 # Static analysis config
+├── compose.yaml                                 # Docker (Laravel Sail)
+└── README.md                                    # This file
+```
+
+---
+
+## 🧪 Testing
+
+## 🔧 Composer Scripts
+
+```bash
+# ✅ Run all quality checks
+sail composer quality
+# → Formatting + Static analysis + Tests
+
+# 🎨 Format code automatically (PSR-12 + Laravel)
+sail composer cs-fix
+
+# 🔍 Check formatting without changing files
+sail composer cs-check
+
+# 📊 Static analysis with PHPStan (level 6)
+sail composer phpstan
+
+# 🧪 Run tests (clears cache first)
+sail composer test
+```
+
+---
+
+## 🔒 Security
+
+### Implemented Measures
+
+| Measure | Description |
+|---------|-------------|
+| **Rate Limiting** | 60 requests/minute on `/calculate` endpoint |
+| **Input Validation** | Laravel Form Request with 15+ validation rules |
+| **Type Safety** | PHP 8.4 strict types in all classes |
+| **Defensive Programming** | Service throws exceptions for impossible values |
+| **No Stack Trace** | Sanitized errors in production (via Laravel Handler) |
+| **CORS** | Configured for localhost (production) |
+| **Force JSON** | Middleware ensures consistent JSON responses |
+
+---
+
+## 💻 Development
+
+### Useful Commands
+
+```bash
+# Start containers
+sail up -d
+
+# View logs in real-time
+sail logs -f
+
+# Enter PHP container
+sail shell
+
+# Stop containers
+sail down
+
+# Clear Laravel cache
+sail artisan cache:clear
+sail artisan config:clear
+sail artisan route:clear
+
+# Rebuild containers
+sail build --no-cache
+```
+---
+
+## 👨‍💻 Author
+
+Developed by **João Alves** as part of a technical challenge.
+
+**Stack:** Laravel · PHP · Docker
+
