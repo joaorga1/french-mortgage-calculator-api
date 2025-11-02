@@ -10,9 +10,11 @@ This API accurately calculates the **monthly payment** for a mortgage, supportin
 
 - ✅ **Fixed Rate**: Constant interest rate throughout the period
 - ✅ **Variable Rate**: Euribor (or other index) + Spread
+- ✅ **Bearer Token Authentication**: Secure API access with Laravel Sanctum
+- ✅ **User Management**: Register, login, logout, and profile endpoints
 - ✅ **Strict Validations**: 15+ validation rules for data integrity
 - ✅ **Rate Limiting**: Protection against abuse (60 req/min)
-- ✅ **100% Tested**: 25 tests (unit + feature)
+- ✅ **100% Tested**: 39 tests (unit + feature)
 
 ---
 
@@ -54,6 +56,8 @@ M ≈ 898.09€/month
 |------------|---------|---------|
 | **PHP** | 8.4 | Strictly typed language |
 | **Laravel** | 12.0 | RESTful API framework |
+| **Laravel Sanctum** | 4.x | Bearer token authentication |
+| **MySQL** | 8.0 | Relational database |
 | **Docker** | via Sail | Development environment |
 | **PHPUnit** | 11.5 | Automated testing |
 | **PHPStan** | 2.1 (level 6) | Static code analysis |
@@ -104,7 +108,10 @@ sail artisan key:generate
 # 7. Complete the .env file with credentials
 DB_PASSWORD
 
-# 8. Check application health
+# 8. Run database migrations
+sail artisan migrate
+
+# 9. Check application health
 curl http://localhost/api/health
 # Expected response: 200 OK
 ```
@@ -122,7 +129,133 @@ sail artisan test
 
 ---
 
-## 🚀 API Usage
+## 🔐 Authentication
+
+This API uses **Bearer Token authentication** powered by Laravel Sanctum. All mortgage calculation endpoints require authentication.
+
+### 🔑 Authentication Endpoints
+
+| Method | Endpoint | Description | Protected |
+|--------|----------|-------------|-----------|
+| `POST` | `/api/auth/register` | Create new user account | ❌ Public |
+| `POST` | `/api/auth/login` | Authenticate and get token | ❌ Public |
+| `POST` | `/api/auth/logout` | Revoke current token | ✅ Requires token |
+| `GET` | `/api/auth/me` | Get authenticated user profile | ✅ Requires token |
+
+---
+
+### 📝 Example: Register User
+
+**Request:**
+```bash
+curl -X POST http://localhost/api/auth/register \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "password": "SecurePass123!",
+    "password_confirmation": "SecurePass123!"
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "João Silva",
+      "email": "joao@example.com"
+    },
+    "access_token": "{TOKEN}",
+    "token_type": "Bearer"
+  }
+}
+```
+
+---
+
+### 🔓 Example: Login
+
+**Request:**
+```bash
+curl -X POST http://localhost/api/auth/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "email": "joao@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "João Silva",
+      "email": "joao@example.com"
+    },
+    "access_token": "{TOKEN}",
+    "token_type": "Bearer"
+  }
+}
+```
+
+> 💡 **Important:** Save the `access_token` from the response. You'll need it for authenticated requests.
+
+---
+
+### 👤 Example: Get Profile
+
+**Request:**
+```bash
+curl -X GET http://localhost/api/auth/me \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer {TOKEN}"
+```
+
+**Response (200 OK):**
+```json
+{
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "João Silva",
+      "email": "joao@example.com",
+      "created_at": "2025-11-02T18:30:00+00:00"
+    }
+  }
+}
+```
+
+---
+
+### 🚪 Example: Logout
+
+**Request:**
+```bash
+curl -X POST http://localhost/api/auth/logout \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer {TOKEN}"
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+> 💡 **Note:** After logout, the token is revoked and can no longer be used.
+
+---
+
+## 🚀 API Usage (Mortgage Calculation)
 
 ### Endpoint: Calculate Monthly Payment
 
@@ -130,7 +263,10 @@ sail artisan test
 POST /api/mortgage/calculate
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {TOKEN}
 ```
+
+> ⚠️ **Authentication Required:** You must include a valid Bearer token in the Authorization header.
 
 ---
 
@@ -141,6 +277,7 @@ Accept: application/json
 curl -X POST http://localhost/api/mortgage/calculate \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
+  -H "Authorization: Bearer {TOKEN}" \
   -d '{
     "loan_amount": 200000,
     "duration_months": 360,
@@ -176,6 +313,7 @@ curl -X POST http://localhost/api/mortgage/calculate \
 curl -X POST http://localhost/api/mortgage/calculate \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
+  -H "Authorization: Bearer {TOKEN}" \
   -d '{
     "loan_amount": 250000,
     "duration_months": 300,
@@ -214,6 +352,7 @@ curl -X POST http://localhost/api/mortgage/calculate \
 curl -X POST http://localhost/api/mortgage/calculate \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
+  -H "Authorization: Bearer {TOKEN}" \
   -d '{
     "loan_amount": 3000,
     "type": "fixed"
@@ -241,11 +380,27 @@ curl -X POST http://localhost/api/mortgage/calculate \
 
 ### Available Endpoints
 
-| Method | Endpoint | Description | Rate Limit |
-|--------|----------|-------------|------------|
-| `POST` | `/api/mortgage/calculate` | Calculate monthly payment | 60/min |
-| `GET` | `/api/health` | Health check (API metadata) | - |
-| `GET` | `/up` | Laravel native health check | - |
+#### Authentication Endpoints
+
+| Method | Endpoint | Description | Protected | Rate Limit |
+|--------|----------|-------------|-----------|------------|
+| `POST` | `/api/auth/register` | Create new user account | ❌ | - |
+| `POST` | `/api/auth/login` | Authenticate and get token | ❌ | - |
+| `POST` | `/api/auth/logout` | Revoke current token | ✅ | - |
+| `GET` | `/api/auth/me` | Get authenticated user profile | ✅ | - |
+
+#### Mortgage Calculation Endpoints
+
+| Method | Endpoint | Description | Protected | Rate Limit |
+|--------|----------|-------------|-----------|------------|
+| `POST` | `/api/mortgage/calculate` | Calculate monthly payment | ✅ | 60/min |
+
+#### Health Check Endpoints
+
+| Method | Endpoint | Description | Protected | Rate Limit |
+|--------|----------|-------------|-----------|------------|
+| `GET` | `/api/health` | Custom health check (API + dependencies) | ❌ | - |
+| `GET` | `/up` | Laravel native health check | ❌ | - |
 
 > **💡 About the Health Check Endpoints:**  
 > Laravel provides `/up` by default for **basic infrastructure checks** (container/pod liveness). However, the custom `/api/health` endpoint was added as a **best practice** to go beyond basic status:
@@ -317,26 +472,38 @@ api/
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   └── Api/
-│   │   │       └── MortgageController.php       # API endpoints
+│   │   │       ├── AuthController.php           # Authentication endpoints
+│   │   │       └── MortgageController.php       # Mortgage calculation
 │   │   ├── Middleware/
 │   │   │   └── ForceJsonResponse.php            # Force JSON responses
 │   │   ├── Requests/
-│   │   │   └── CalculateMortgageRequest.php     # Validations
+│   │   │   ├── CalculateMortgageRequest.php     # Mortgage validations
+│   │   │   ├── RegisterRequest.php              # Registration validations
+│   │   │   └── LoginRequest.php                 # Login validations
 │   │   └── Resources/
 │   │       └── MortgageCalculationResource.php  # JSON formatting
+│   ├── Models/
+│   │   └── User.php                             # User model with Sanctum
 │   ├── Providers/
 │   │   └── AppServiceProvider.php               # Register services
 │   └── Services/
 │       └── MortgageCalculatorService.php        # Business logic
 ├── config/
-│   └── cors.php                                 # CORS configuration
+│   ├── auth.php                                 # Authentication configuration
+│   ├── cors.php                                 # CORS configuration
+│   └── sanctum.php                              # Sanctum configuration
+├── database/
+│   └── migrations/
+│       ├── create_users_table.php               # Users table
+│       └── create_personal_access_tokens_table.php  # Sanctum tokens
 ├── routes/
 │   └── api.php                                  # API routes
 ├── tests/
 │   ├── Unit/
 │   │   └── MortgageCalculatorServiceTest.php   # 8 unit tests
 │   └── Feature/
-│       └── MortgageCalculationTest.php          # 17 HTTP tests
+│       ├── AuthenticationTest.php               # 17 authentication tests
+│       └── MortgageCalculationTest.php          # 17 mortgage tests
 ├── .php-cs-fixer.php                            # Formatting config
 ├── phpstan.neon                                 # Static analysis config
 ├── compose.yaml                                 # Docker (Laravel Sail)
@@ -375,6 +542,9 @@ sail composer test
 
 | Measure | Description |
 |---------|-------------|
+| **Bearer Token Authentication** | Laravel Sanctum for secure API access |
+| **Password Hashing** | Bcrypt with configurable rounds (default: 12) |
+| **Token Revocation** | Logout immediately invalidates tokens |
 | **Rate Limiting** | 60 requests/minute on `/calculate` endpoint |
 | **Input Validation** | Laravel Form Request with 15+ validation rules |
 | **Type Safety** | PHP 8.4 strict types in all classes |
