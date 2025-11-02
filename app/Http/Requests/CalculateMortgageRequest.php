@@ -78,7 +78,7 @@ class CalculateMortgageRequest extends FormRequest
             'index_rate.numeric' => 'Index rate must be a number',
             'index_rate.min' => 'Index rate must be greater than 0%',
             'index_rate.max' => 'Index rate must be less than 100%',
-            
+
             'spread.required_if' => 'Spread is required for type "variable"',
             'spread.numeric' => 'Spread must be a number',
             'spread.min' => 'Spread must be greater than 0%',

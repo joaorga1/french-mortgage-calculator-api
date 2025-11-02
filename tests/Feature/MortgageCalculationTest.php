@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MortgageCalculationTest extends TestCase
@@ -59,7 +58,7 @@ class MortgageCalculationTest extends TestCase
             ]);
 
         $data = $response->json('data');
-        
+
         // Validar tipos e valores
         $this->assertIsFloat($data['monthly_payment']);
         $this->assertEquals(843.21, $data['monthly_payment']);
@@ -137,7 +136,7 @@ class MortgageCalculationTest extends TestCase
     public function test_validates_loan_amount_maximum(): void
     {
         $payload = [
-            'loan_amount' => 15000000, 
+            'loan_amount' => 15000000,
             'duration_months' => 360,
             'type' => 'fixed',
             'rate' => 3.5,
@@ -315,7 +314,7 @@ class MortgageCalculationTest extends TestCase
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
         $response->assertStatus(200);
-        
+
         $monthlyPayment = $response->json('data.monthly_payment');
         $this->assertGreaterThan(0, $monthlyPayment);
         $this->assertLessThan($payload['loan_amount'], $monthlyPayment * 12); // Juros baixos
@@ -336,7 +335,7 @@ class MortgageCalculationTest extends TestCase
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
         $response->assertStatus(200);
-        
+
         $monthlyPayment = $response->json('data.monthly_payment');
         $this->assertGreaterThan(0, $monthlyPayment);
     }
