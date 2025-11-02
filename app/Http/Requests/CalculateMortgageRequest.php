@@ -9,7 +9,7 @@ class CalculateMortgageRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // API pública
+        return true; // Public API
     }
 
     public function rules(): array

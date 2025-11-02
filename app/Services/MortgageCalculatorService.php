@@ -26,7 +26,7 @@ class MortgageCalculatorService
         return $result;
     }
     /**
-     * Calcula a prestação mensal usando amortização francesa
+     * Calculates the monthly payment using French amortization
      */
     public function calculateMonthlyPayment(
         float $loanAmount,

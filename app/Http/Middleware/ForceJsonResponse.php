@@ -9,12 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 class ForceJsonResponse
 {
     /**
-     * Força Accept: application/json em todas as requests API
+     * Forces the Accept header to application/json in all API requests
      */
     public function handle(Request $request, Closure $next): Response
     {
         $request->headers->set('Accept', 'application/json');
-        
+
         return $next($request);
     }
 }

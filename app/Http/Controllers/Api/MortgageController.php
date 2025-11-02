@@ -24,9 +24,9 @@ class MortgageController extends Controller
     }
 
     // Health check
-    // Nota: Laravel já fornece /up nativo. Este endpoint custom serve para:
-    // - Consistência com namespace /api/*
-    // - Expansão futura com checks de dependências externas
+    // Note: Laravel already provides /up natively. This custom endpoint serves for:
+    // - Consistency with /api/* namespace
+    // - Future expansion with checks of external dependencies
     public function health(): JsonResponse
     {
         return response()->json([
