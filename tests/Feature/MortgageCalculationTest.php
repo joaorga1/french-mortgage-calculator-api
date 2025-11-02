@@ -2,12 +2,31 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class MortgageCalculationTest extends TestCase
 {
+    use RefreshDatabase;
+
+    private User $user;
+
     /**
-     * Test: Health check endpoint retorna status correto
+     * Setup: create authenticated user before each test
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Create user and authenticate with Sanctum
+        $this->user = User::factory()->create();
+        Sanctum::actingAs($this->user);
+    }
+
+    /**
+     * Test: Health check endpoint returns correct status
      */
     public function test_health_endpoint_returns_ok_status(): void
     {
@@ -27,7 +46,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Calcular prestação com taxa fixa (duration_years)
+     * Test: Calculate mortgage with fixed rate (duration_years)
      */
     public function test_calculates_mortgage_with_fixed_rate_and_duration(): void
     {
@@ -59,7 +78,7 @@ class MortgageCalculationTest extends TestCase
 
         $data = $response->json('data');
 
-        // Validar tipos e valores
+        // Validate types and values
         $this->assertIsFloat($data['monthly_payment']);
         $this->assertEquals(843.21, $data['monthly_payment']);
         $this->assertEquals(200000, $data['loan_amount']);
@@ -68,7 +87,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Calcular prestação com taxa variável
+     * Test: Calculate mortgage with variable rate
      */
     public function test_calculates_mortgage_with_variable_rate(): void
     {
@@ -94,7 +113,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - loan_amount é obrigatório
+     * Test: Validation - loan_amount is required
      */
     public function test_validates_loan_amount_is_required(): void
     {
@@ -112,12 +131,12 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - loan_amount mínimo
+     * Test: Validation - loan_amount minimum
      */
     public function test_validates_loan_amount_minimum(): void
     {
         $payload = [
-            'loan_amount' => 4000, // Abaixo de 5.000
+            'loan_amount' => 4000, // Below 5.000
             'duration_months' => 360,
             'type' => 'fixed',
             'rate' => 3.5,
@@ -131,7 +150,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - loan_amount máximo
+     * Test: Validation - loan_amount maximum
      */
     public function test_validates_loan_amount_maximum(): void
     {
@@ -150,7 +169,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - duration é obrigatória
+     * Test: Validation - duration is required
      */
     public function test_validates_duration_is_required(): void
     {
@@ -168,13 +187,13 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - duration_years mínimo
+     * Test: Validation - duration_years minimum
      */
     public function test_validates_duration_months_minimum(): void
     {
         $payload = [
             'loan_amount' => 200000,
-            'duration_months' => 0, // Mínimo é 1
+            'duration_months' => 0, // Minimum is 1
             'type' => 'fixed',
             'rate' => 3.5,
         ];
@@ -187,13 +206,13 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - duration_years máximo
+     * Test: Validation - duration_years maximum
      */
     public function test_validates_duration_months_maximum(): void
     {
         $payload = [
             'loan_amount' => 200000,
-            'duration_months' => 612, // Máximo é 480
+            'duration_months' => 612, // Maximum is 480
             'type' => 'fixed',
             'rate' => 3.5,
         ];
@@ -206,7 +225,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - type é obrigatório
+     * Test: Validation - type is required
      */
     public function test_validates_type_is_required(): void
     {
@@ -224,7 +243,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - type deve ser 'fixed' ou 'variable'
+     * Test: Validation - type must be 'fixed' or 'variable'
      */
     public function test_validates_type_must_be_valid(): void
     {
@@ -243,7 +262,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - taxa fixa requer campo 'rate'
+     * Test: Validation - fixed rate requires 'rate' field
      */
     public function test_validates_fixed_rate_requires_rate_field(): void
     {
@@ -251,7 +270,7 @@ class MortgageCalculationTest extends TestCase
             'loan_amount' => 200000,
             'duration_months' => 360,
             'type' => 'fixed',
-            // 'rate' está ausente
+            // 'rate' is missing
         ];
 
         $response = $this->postJson('/api/mortgage/calculate', $payload);
@@ -262,7 +281,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - taxa variável requer 'index_rate' e 'spread'
+     * Test: Validation - variable rate requires 'index_rate' and 'spread'
      */
     public function test_validates_variable_rate_requires_index_rate_and_spread(): void
     {
@@ -270,7 +289,7 @@ class MortgageCalculationTest extends TestCase
             'loan_amount' => 200000,
             'duration_months' => 360,
             'type' => 'variable',
-            // 'index_rate' e 'spread' estão ausentes
+            // 'index_rate' and 'spread' are missing
         ];
 
         $response = $this->postJson('/api/mortgage/calculate', $payload);
@@ -281,7 +300,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Validação - rate não pode ser negativa
+     * Test: Validation - rate cannot be negative
      */
     public function test_validates_rate_cannot_be_negative(): void
     {
@@ -300,7 +319,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Cálculo com valores extremos (empréstimo pequeno)
+     * Test: Calculation with extreme values (small loan)
      */
     public function test_calculates_with_minimum_values(): void
     {
@@ -317,11 +336,11 @@ class MortgageCalculationTest extends TestCase
 
         $monthlyPayment = $response->json('data.monthly_payment');
         $this->assertGreaterThan(0, $monthlyPayment);
-        $this->assertLessThan($payload['loan_amount'], $monthlyPayment * 12); // Juros baixos
+        $this->assertLessThan($payload['loan_amount'], $monthlyPayment * 12); // Low interest
     }
 
     /**
-     * Test: Cálculo com valores extremos (empréstimo grande)
+     * Test: Calculation with extreme values (large loan)
      */
     public function test_calculates_with_maximum_values(): void
     {
@@ -341,7 +360,7 @@ class MortgageCalculationTest extends TestCase
     }
 
     /**
-     * Test: Prestação maior para taxa maior (mesmas condições)
+     * Test: Higher payment for higher rate (same conditions)
      */
     public function test_higher_rate_results_in_higher_payment(): void
     {
@@ -351,11 +370,11 @@ class MortgageCalculationTest extends TestCase
             'type' => 'fixed',
         ];
 
-        // Taxa baixa
+        // Low rate
         $response1 = $this->postJson('/api/mortgage/calculate', array_merge($basePayload, ['rate' => 2.0]));
         $payment1 = $response1->json('data.monthly_payment');
 
-        // Taxa alta
+        // High rate
         $response2 = $this->postJson('/api/mortgage/calculate', array_merge($basePayload, ['rate' => 5.0]));
         $payment2 = $response2->json('data.monthly_payment');
 
