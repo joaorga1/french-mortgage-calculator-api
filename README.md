@@ -78,13 +78,33 @@ cd api
 # 2. Copy environment variables
 cp .env.example .env
 
-# 3. Start Docker containers (Laravel Sail)
-./vendor/bin/sail up -d
+# 3. Install PHP dependencies
+# Option A: Using Docker (recommended, no local PHP/Composer needed)
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php84-composer:latest \
+    composer install --ignore-platform-reqs
 
-# 4. Generate application key
-./vendor/bin/sail artisan key:generate
+# Option B: Using local Composer (if installed)
+composer install
 
-# 5. Check application health
+# 4. Configure Sail alias (optional but recommended)
+echo "alias sail='./vendor/bin/sail'" >> ~/.bashrc
+source ~/.bashrc
+# For zsh users, use ~/.zshrc instead of ~/.bashrc
+
+# 5. Start Docker containers (Laravel Sail)
+sail up -d
+
+# 6. Generate application key
+sail artisan key:generate
+
+# 7. Complete the .env file with credentials
+DB_PASSWORD
+
+# 8. Check application health
 curl http://localhost/api/health
 # Expected response: 200 OK
 ```
