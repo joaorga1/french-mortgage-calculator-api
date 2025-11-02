@@ -36,11 +36,11 @@ class MortgageCalculatorService
         if ($loanAmount <= 0) {
             throw new InvalidArgumentException('Loan amount must be greater than zero');
         }
-    
+
         if ($durationMonths <= 0) {
             throw new InvalidArgumentException('Duration must be greater than zero');
         }
-    
+
         if ($annualRate < 0) {
             throw new InvalidArgumentException('Annual rate cannot be negative');
         }
@@ -62,7 +62,7 @@ class MortgageCalculatorService
     public function calculateRate(array $data): float
     {
         // Validações básicas (FormRequest já validou os detalhes)
-        if (!isset($data['type'])) {
+        if (! isset($data['type'])) {
             throw new InvalidArgumentException('Rate type is required');
         }
 
