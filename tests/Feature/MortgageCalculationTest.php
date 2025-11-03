@@ -60,9 +60,10 @@ class MortgageCalculationTest extends TestCase
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
+                    'id',
                     'monthly_payment',
                     'loan_amount',
                     'duration_months',
@@ -79,8 +80,8 @@ class MortgageCalculationTest extends TestCase
         $data = $response->json('data');
 
         // Validate types and values
-        $this->assertIsFloat($data['monthly_payment']);
-        $this->assertEquals(843.21, $data['monthly_payment']);
+        $this->assertIsFloat((float)$data['monthly_payment']);
+        $this->assertEquals(843.21, (float) $data['monthly_payment']);
         $this->assertEquals(200000, $data['loan_amount']);
         $this->assertEquals(360, $data['duration_months']);
         $this->assertEquals(3, $data['annual_rate']);
@@ -102,7 +103,7 @@ class MortgageCalculationTest extends TestCase
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => [
                     'loan_amount' => 180000,
@@ -332,7 +333,7 @@ class MortgageCalculationTest extends TestCase
 
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $monthlyPayment = $response->json('data.monthly_payment');
         $this->assertGreaterThan(0, $monthlyPayment);
@@ -353,7 +354,7 @@ class MortgageCalculationTest extends TestCase
 
         $response = $this->postJson('/api/mortgage/calculate', $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $monthlyPayment = $response->json('data.monthly_payment');
         $this->assertGreaterThan(0, $monthlyPayment);

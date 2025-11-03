@@ -19,6 +19,13 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Mortgage calculation with rate limiting
-Route::middleware('auth:sanctum')->post('/mortgage/calculate', [MortgageController::class, 'calculate'])
-    ->middleware('throttle:60,1');
+// Protected routes
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    // Mortgage calculation
+    Route::post('/mortgage/calculate', [MortgageController::class, 'calculate']);
+
+    // Simulations management
+    Route::get('/simulations', [MortgageController::class, 'index']);
+    Route::get('/simulations/{simulation}', [MortgageController::class, 'show']);
+    Route::get('/simulations/{simulation}/export', [MortgageController::class, 'export']);
+});
