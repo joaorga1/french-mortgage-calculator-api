@@ -14,6 +14,7 @@ REST API for mortgage simulation using the **French amortization method**. Built
 - ✅ **Health Monitoring**: Database connection checks for reliability
 - ✅ **Rate Limiting**: 60 requests/minute protection against abuse
 - ✅ **100% Tested**: 65 tests (13 unit + 52 feature) covering all functionality
+- ✅ **CI/CD**: Automated testing with GitHub Actions on every push/PR
 
 ---
 
@@ -220,6 +221,24 @@ sail composer cs-check
 # 📊 Static analysis (PHPStan level 6)
 sail composer phpstan
 ```
+
+### 🤖 Continuous Integration (CI/CD)
+
+The project uses **GitHub Actions** to automatically run quality checks on every push and pull request:
+
+**What runs automatically:**
+- ✅ PHPStan (static analysis)
+- ✅ PHP-CS-Fixer (code formatting check)
+- ✅ PHPUnit tests (all 65 tests)
+- ✅ Database migrations
+
+**Workflow file:** `.github/workflows/tests.yml`
+
+**When it runs:**
+- Push to `main` branch
+- Pull requests to `main` (from any branch)
+
+[📖 View workflow details](.github/workflows/README.md)
 
 ---
 
