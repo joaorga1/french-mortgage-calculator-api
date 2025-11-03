@@ -1048,11 +1048,11 @@
                     "Health Check"
                 ],
                 "summary": "API health check",
-                "description": "Check if the API is running and responsive. This endpoint can be extended to monitor database connections, cache services, and third-party API availability.",
+                "description": "Check if the API and its dependencies (database) are running and responsive. Returns detailed status for monitoring and alerting systems.",
                 "operationId": "51f5300ffd041367a307b601295a917a",
                 "responses": {
                     "200": {
-                        "description": "API is healthy",
+                        "description": "API and all dependencies are healthy",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1069,6 +1069,66 @@
                                             "type": "string",
                                             "format": "date-time",
                                             "example": "2025-11-03T12:00:00+00:00"
+                                        },
+                                        "checks": {
+                                            "properties": {
+                                                "database": {
+                                                    "properties": {
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "ok"
+                                                        },
+                                                        "connection": {
+                                                            "type": "string",
+                                                            "example": "mysql"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service unavailable - one or more dependencies are down",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "service": {
+                                            "type": "string",
+                                            "example": "mortgage-calculator-api"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "checks": {
+                                            "properties": {
+                                                "database": {
+                                                    "properties": {
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "error"
+                                                        },
+                                                        "error": {
+                                                            "type": "string",
+                                                            "example": "Connection refused"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
