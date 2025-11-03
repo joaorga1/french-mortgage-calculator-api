@@ -4,15 +4,16 @@ REST API for mortgage simulation using the **French amortization method**. Built
 
 ---
 
-## 📋 About the Project
+## 📋 Features
 
-This API accurately calculates the **monthly payment** for a mortgage, supporting:
-- ✅ **Fixed & Variable Rates**: Accurate mortgage calculations
-- ✅ **Simulation History**: Save and retrieve past simulations  
-- ✅ **Export Data**: Download amortization tables (CSV/Excel)
+- ✅ **Fixed & Variable Rates**: Accurate mortgage calculations using French amortization
+- ✅ **Simulation History**: Save and retrieve past simulations with complete details
+- ✅ **Export Data**: Download amortization tables (CSV/Excel format)
 - ✅ **Bearer Token Auth**: Secure API access with Laravel Sanctum
-- ✅ **Rate Limiting**: 60 requests/minute protection
-- ✅ **100% Tested**: 65 tests covering all functionality
+- ✅ **Interactive Docs**: Swagger/OpenAPI UI for live API testing
+- ✅ **Health Monitoring**: Database connection checks for reliability
+- ✅ **Rate Limiting**: 60 requests/minute protection against abuse
+- ✅ **100% Tested**: 65 tests (13 unit + 52 feature) covering all functionality
 
 ---
 
@@ -63,6 +64,8 @@ curl http://localhost/api/health
 | Document | Description |
 |----------|-------------|
 | **[API.md](./API.md)** | Complete API documentation with all endpoints, examples, and validation rules |
+| **[Swagger UI](http://localhost/api/documentation)** | Interactive API documentation with live testing (requires running server) |
+| **[Postman Collection](./Doutor%20Finanças.postman_collection.json)** | Ready-to-use Postman collection with all endpoints and examples |
 
 ### Quick Navigation
 
@@ -70,6 +73,8 @@ curl http://localhost/api/health
 - [🏠 Mortgage Calculation](./API.md#-mortgage-calculation) - Calculate payments
 - [📊 Simulation Management](./API.md#-simulation-management) - List and view history
 - [📥 Export](./API.md#-export) - Download CSV/Excel tables
+- [📊 Swagger/OpenAPI](http://localhost/api/documentation) - Interactive API explorer
+- [📮 Postman Collection](./Doutor%20Finanças.postman_collection.json) - Import into Postman/Insomnia
 
 ---
 
@@ -114,6 +119,7 @@ M ≈ 898.09€/month
 | **Laravel Sanctum** | 4.x | Bearer token authentication |
 | **MySQL** | 8.0 | Relational database |
 | **Maatwebsite/Excel** | 3.x | CSV/Excel export |
+| **L5-Swagger** | 8.x | OpenAPI/Swagger documentation |
 | **Docker** | via Sail | Development environment |
 | **PHPUnit** | 11.5 | Automated testing |
 | **PHPStan** | 2.1 (level 6) | Static code analysis |
@@ -177,7 +183,13 @@ curl http://localhost/api/health
 {
   "status": "ok",
   "service": "mortgage-calculator-api",
-  "timestamp": "2025-11-03T12:00:00+00:00"
+  "timestamp": "2025-11-03T12:00:00+00:00",
+  "checks": {
+    "database": {
+      "status": "ok",
+      "connection": "mysql"
+    }
+  }
 }
 ```
 
@@ -316,7 +328,44 @@ sail shell                  # Enter PHP container
 
 ## 🎯 Health Check Endpoints
 
-The API provides two health check endpoints:
+The API provides two health check endpoints for monitoring:
+
+| Endpoint | Purpose | Status Codes | Checks |
+|----------|---------|--------------|--------|
+| `/up` | Laravel native health check | `200` OK | Basic container/infrastructure status |
+| `/api/health` | Custom health check with dependency monitoring | `200` OK / `503` Error | Database connection, extensible for cache/APIs |
+
+### `/api/health` Response Examples
+
+**✅ Healthy (200 OK):**
+```json
+{
+  "status": "ok",
+  "service": "mortgage-calculator-api",
+  "timestamp": "2025-11-03T12:00:00+00:00",
+  "checks": {
+    "database": {
+      "status": "ok",
+      "connection": "mysql"
+    }
+  }
+}
+```
+
+**❌ Unhealthy (503 Service Unavailable):**
+```json
+{
+  "status": "error",
+  "service": "mortgage-calculator-api",
+  "timestamp": "2025-11-03T12:00:00+00:00",
+  "checks": {
+    "database": {
+      "status": "error",
+      "error": "Database connection failed"
+    }
+  }
+}
+```
 
 | Endpoint | Purpose | Details |
 |----------|---------|---------|

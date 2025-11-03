@@ -4,6 +4,15 @@ Complete reference for the Mortgage Calculator API.
 
 ---
 
+## 🚀 Interactive Testing
+
+| Tool | Description | Link |
+|------|-------------|------|
+| **Swagger UI** | Interactive API explorer with live testing | (http://localhost/api/documentation) |
+| **Postman Collection** | Pre-configured collection with all endpoints | (./Doutor%20Finanças.postman_collection.json) |
+
+---
+
 ## Table of Contents
 
 - [Authentication](#-authentication)
