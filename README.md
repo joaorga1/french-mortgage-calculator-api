@@ -199,6 +199,24 @@ sail composer phpstan
 
 ---
 
+### 🤖 Continuous Integration (CI/CD)
+
+The project uses **GitHub Actions** to automatically run quality checks on every push and pull request:
+
+**What runs automatically:**
+- ✅ PHPStan (static analysis)
+- ✅ PHP-CS-Fixer (code formatting check)
+- ✅ PHPUnit tests (all 65 tests)
+- ✅ Database migrations
+
+**Workflow file:** `.github/workflows/tests.yml`
+
+**When it runs:**
+- Push to `main` branch
+- Pull requests to `main` (from any branch)
+
+---
+
 ## 📁 Project Structure
 
 ```
