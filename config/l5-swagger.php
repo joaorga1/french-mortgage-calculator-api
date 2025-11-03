@@ -2,7 +2,7 @@
 
 return [
     'default' => 'default',
-    
+
     'documentations' => [
         'default' => [
             'api' => [
@@ -15,7 +15,7 @@ return [
                  */
                 'api' => 'api/documentation',
             ],
-            
+
             'paths' => [
                 /*
                  * Edit to set absolute path where to store generated annotations
@@ -67,7 +67,7 @@ return [
             ],
         ],
     ],
-    
+
     'defaults' => [
         'routes' => [
             /*
@@ -175,7 +175,7 @@ return [
                 ],
             ],
         ],
-        
+
         'constants' => [
             'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost')),
         ],

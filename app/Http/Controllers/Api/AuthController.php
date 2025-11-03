@@ -223,7 +223,7 @@ class AuthController extends Controller
 
     /**
      * Logout user (revoke token)
-     * 
+     *
      * @OA\Post(
      *     path="/api/auth/logout",
      *     tags={"Authentication"},
@@ -270,7 +270,7 @@ class AuthController extends Controller
 
     /**
      * Get authenticated user
-     * 
+     *
      * @OA\Get(
      *     path="/api/auth/me",
      *     tags={"Authentication"},

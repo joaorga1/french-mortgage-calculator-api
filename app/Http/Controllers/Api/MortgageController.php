@@ -11,9 +11,9 @@ use App\Services\SimulationExportService;
 use App\Services\SimulationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Annotations as OA;
-use Illuminate\Support\Facades\DB;
 
 class MortgageController extends Controller
 {
@@ -440,7 +440,7 @@ class MortgageController extends Controller
                 'status' => 'error',
                 'error' => config('app.debug') ? $e->getMessage() : 'Database connection failed',
             ];
-            
+
             Log::error('Health check failed - database connection', [
                 'error' => $e->getMessage(),
             ]);
