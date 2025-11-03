@@ -22,3 +22,16 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Cache e builds
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# Logs
+/storage/logs/*.log
+
+# Docker volumes
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
