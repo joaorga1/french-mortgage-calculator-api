@@ -537,7 +537,7 @@ curl -X GET http://localhost/api/simulations/2 \
   -H "Authorization: Bearer {TOKEN}"
 ```
 
-> 💡 **Amortization Table:** The table includes all monthly payments from month 1 to the final month. The `balance` reaches exactly **0.00** at the end due to precise floating-point calculations.
+> 💡 **Amortization Table:** The table includes all monthly payments from month 1 to the final month. 
 
 **Amortization Table Fields:**
 | Field | Type | Description |
@@ -669,7 +669,7 @@ Monitor API availability and dependencies.
 
 ### Custom Health Check
 
-Extensible endpoint for monitoring application-level dependencies.
+Extensible endpoint for monitoring application-level dependencies (database, cache, external APIs).
 
 **Endpoint:** `GET /api/health`
 
@@ -678,7 +678,28 @@ Extensible endpoint for monitoring application-level dependencies.
 {
   "status": "ok",
   "service": "mortgage-calculator-api",
-  "timestamp": "2025-11-03T12:00:00+00:00"
+  "timestamp": "2025-11-03T12:00:00+00:00",
+  "checks": {
+    "database": {
+      "status": "ok",
+      "connection": "mysql"
+    }
+  }
+}
+```
+
+**Error Response (503 Service Unavailable):**
+```json
+{
+  "status": "error",
+  "service": "mortgage-calculator-api",
+  "timestamp": "2025-11-03T12:00:00+00:00",
+  "checks": {
+    "database": {
+      "status": "error",
+      "error": "Database connection failed"
+    }
+  }
 }
 ```
 
@@ -687,11 +708,16 @@ Extensible endpoint for monitoring application-level dependencies.
 curl http://localhost/api/health
 ```
 
+**Response Codes:**
+- `200 OK` - All systems operational
+- `503 Service Unavailable` - One or more dependencies down
+
 > 💡 **Use Cases:**
-> - Monitor database connectivity
-> - Check cache service status
-> - Verify third-party API availability
+> - Monitor database connectivity status
+> - Check cache service availability
+> - Verify third-party API health
 > - Custom business logic health metrics
+> - Integration with monitoring tools (Datadog, New Relic, Prometheus)
 
 ---
 
