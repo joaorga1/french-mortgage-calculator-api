@@ -1,0 +1,52 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Copy .env
+      run: cp .env.example .env
+
+    - name: Install Composer dependencies with Docker
+      run: |
+        docker run --rm \
+          -u "$(id -u):$(id -g)" \
+          -v "$(pwd):/var/www/html" \
+          -w /var/www/html \
+          laravelsail/php84-composer:latest \
+          composer install --ignore-platform-reqs
+
+    - name: Start Sail services
+      run: ./vendor/bin/sail up -d
+
+    - name: Wait for MySQL to be ready
+      run: |
+        ./vendor/bin/sail exec -T laravel.test bash -c '
+          until mysqladmin ping -h mysql --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+        '
+
+    - name: Generate application key
+      run: ./vendor/bin/sail artisan key:generate
+
+    - name: Run migrations
+      run: ./vendor/bin/sail artisan migrate --force
+
+    - name: Run Quality Checks
+      run: ./vendor/bin/sail composer quality
+
+    - name: Stop Sail services
+      if: always()
+      run: ./vendor/bin/sail down
