@@ -17,48 +17,6 @@ REST API for mortgage simulation using the **French amortization method**. Built
 
 ---
 
-## 🚀 Quick Start
-
-```bash
-# 1. Clone and setup
-git clone <repository-url>
-cd api
-cp .env.example .env
-
-# 2. Install dependencies with Docker (no local PHP needed)
-docker run --rm -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" -w /var/www/html \
-    laravelsail/php84-composer:latest \
-    composer install --ignore-platform-reqs
-
-```
-
-**Optional Alias (Recommended):**
-```bash
-# Add to ~/.bashrc or ~/.zshrc
-echo "alias sail='./vendor/bin/sail'" >> ~/.bashrc
-source ~/.bashrc
-
-# For zsh users:
-echo "alias sail='./vendor/bin/sail'" >> ~/.zshrc
-source ~/.zshrc
-
-```
-```bash
-# 3. Start services
-sail up -d #configure the alias 
-sail artisan key:generate
-sail artisan migrate
-
-# 4. Test it
-curl http://localhost/api/health
-# Expected: {"status":"ok","service":"mortgage-calculator-api","timestamp":"..."}
-```
-
-[📖 **Detailed Installation Guide**](#-installation)
-
----
-
 ## 📖 Documentation
 
 | Document | Description |
@@ -334,43 +292,6 @@ The API provides two health check endpoints for monitoring:
 |----------|---------|--------------|--------|
 | `/up` | Laravel native health check | `200` OK | Basic container/infrastructure status |
 | `/api/health` | Custom health check with dependency monitoring | `200` OK / `503` Error | Database connection, extensible for cache/APIs |
-
-### `/api/health` Response Examples
-
-**✅ Healthy (200 OK):**
-```json
-{
-  "status": "ok",
-  "service": "mortgage-calculator-api",
-  "timestamp": "2025-11-03T12:00:00+00:00",
-  "checks": {
-    "database": {
-      "status": "ok",
-      "connection": "mysql"
-    }
-  }
-}
-```
-
-**❌ Unhealthy (503 Service Unavailable):**
-```json
-{
-  "status": "error",
-  "service": "mortgage-calculator-api",
-  "timestamp": "2025-11-03T12:00:00+00:00",
-  "checks": {
-    "database": {
-      "status": "error",
-      "error": "Database connection failed"
-    }
-  }
-}
-```
-
-| Endpoint | Purpose | Details |
-|----------|---------|---------|
-| `/up` | Laravel native health check | Basic container/infrastructure status |
-| `/api/health` | Custom health check | Extensible for monitoring dependencies (DB, cache, APIs) |
 
 Both are useful for different needs:
 - **`/up`** → Kubernetes liveness/readiness probes
